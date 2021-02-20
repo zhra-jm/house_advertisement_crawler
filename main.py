@@ -1,3 +1,5 @@
+import sys
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -39,5 +41,13 @@ def start_crawl():
         print('total', city, len(links))
 
 
+def get_pages_data():
+    raise NotImplementedError()
+
+
 if __name__ == "__main__":
-    start_crawl()
+    switch = sys.argv[1]
+    if switch == 'find_links':
+        start_crawl()
+    elif switch == 'extract_pages':
+        get_pages_data()
