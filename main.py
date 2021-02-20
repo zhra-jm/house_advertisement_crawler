@@ -19,4 +19,6 @@ if __name__ == "__main__":
     offers = get_page(link)
     print(offers.status_code)
 
-    # links = find_links(offers.text)
+    links = find_links(offers.text)
+    for li in links:
+        print(li.get('href'))
