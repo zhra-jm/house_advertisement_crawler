@@ -1,10 +1,5 @@
 import sys
-from crawl import LinkCrawler
-
-
-def get_pages_data():
-    raise NotImplementedError()
-
+from crawl import LinkCrawler, DataCrawler
 
 if __name__ == "__main__":
     switch = sys.argv[1]
@@ -12,4 +7,5 @@ if __name__ == "__main__":
         crawler = LinkCrawler(cities=['paris', 'munich', 'amsterdam', 'berlin'])
         crawler.start()
     elif switch == 'extract_pages':
-        get_pages_data()
+        crawler = DataCrawler()
+        crawler.start()

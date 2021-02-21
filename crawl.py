@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import BASE_LINK
+from parser import AdvertisementPageParser
 
 
 class CrawlerBase(ABC):
@@ -17,19 +18,20 @@ class CrawlerBase(ABC):
     def store(self, data):
         pass
 
+    @staticmethod
+    def get(link):
+        try:
+            response = requests.get(link)
+        except requests.HTTPError:
+            return None
+        return response
+
 
 class LinkCrawler(CrawlerBase):
 
     def __init__(self, cities, link=BASE_LINK):
         self.cities = cities
         self.link = link
-
-    def get_page(self, url, start):
-        try:
-            response = requests.get(url + str(start))
-        except requests.HTTPError:
-            return None
-        return response
 
     def find_links(self, html_doc):
         soup = BeautifulSoup(html_doc, 'html.parser')
@@ -40,7 +42,7 @@ class LinkCrawler(CrawlerBase):
         crawl = True
         ad_list = list()
         while crawl:
-            offers = self.get_page(url, start)
+            offers = self.get(url+str(start))
             new_list = self.find_links(offers.text)
             ad_list.extend(new_list)
             start += 120
@@ -61,4 +63,22 @@ class LinkCrawler(CrawlerBase):
 
 
 class DataCrawler(CrawlerBase):
-    pass
+    def __init__(self):
+        self.links = self.__load_links()
+        self.parser = AdvertisementPageParser()
+
+    @staticmethod
+    def __load_links():
+        with open('fixtures/data.json', 'r') as f:
+            links = json.loads(f.read())
+        return links
+
+    def start(self):
+        for link in self.links:
+            response = self.get(link)
+            data = self.parser.parse(response.text)
+            print(data)
+
+    def store(self, data):
+        with open('fixtures/data.json', 'w') as f:
+            f.write(json.dumps(data))
