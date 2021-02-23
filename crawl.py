@@ -11,7 +11,7 @@ from parser import AdvertisementPageParser
 class CrawlerBase(ABC):
 
     @abstractmethod
-    def start(self):
+    def start(self, store=False):
         pass
 
     @abstractmethod
@@ -25,6 +25,10 @@ class CrawlerBase(ABC):
         except requests.HTTPError:
             return None
         return response
+
+    @staticmethod
+    def store(self, data, filename=None):
+        pass
 
 
 class LinkCrawler(CrawlerBase):
@@ -42,22 +46,24 @@ class LinkCrawler(CrawlerBase):
         crawl = True
         ad_list = list()
         while crawl:
-            offers = self.get(url+str(start))
+            offers = self.get(url + str(start))
             new_list = self.find_links(offers.text)
             ad_list.extend(new_list)
             start += 120
             crawl = bool(len(new_list))
         return ad_list
 
-    def start(self):
+    def start(self, store):
         adv_links = list()
         for city in self.cities:
             links = self.start_crawl_city(self.link.format(city))
             print('total', city, len(links))
             adv_links.extend(links)
-        self.store([li.get('href') for li in adv_links])
+        if store:
+            self.store([li.get('href') for li in adv_links])
+        return adv_links
 
-    def store(self, data):
+    def store(self, data, *args):
         with open('fixtures/data.json', 'w') as f:
             f.write(json.dumps(data))
 
@@ -73,12 +79,14 @@ class DataCrawler(CrawlerBase):
             links = json.loads(f.read())
         return links
 
-    def start(self):
+    def start(self, store):
         for link in self.links:
             response = self.get(link)
             data = self.parser.parse(response.text)
-            print(data)
+            if store:
+                self.store(data, data.get('post_id', 'sample'))
 
-    def store(self, data):
-        with open('fixtures/data.json', 'w') as f:
+    def store(self, data, filename):
+        with open(f'fixtures/adv/{filename}.json', 'w') as f:
             f.write(json.dumps(data))
+        print(f'fixtures/adv/{filename}.json')

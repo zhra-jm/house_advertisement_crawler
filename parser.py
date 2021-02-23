@@ -2,33 +2,56 @@ from bs4 import BeautifulSoup
 
 
 class AdvertisementPageParser:
-    def parse(self, html_data):
-        soup = BeautifulSoup(html_data, 'html.parser')
-        data = dict(
-            title=None, price=None, body=None, post_id=None,
-            created_time=None, modified_time=None
-        )
-        title_tag = soup.find('span', attrs={'id': 'titletextonly'})
+
+    def __init__(self):
+        self.soup = None
+
+    @property
+    def title(self):
+        title_tag = self.soup.find('span', attrs={'id': 'titletextonly'})
         if title_tag:
-            data['title'] = title_tag.text
+            return title_tag.text
+        return None
 
-        price_tag = soup.find('span', attrs={'class': 'price'})
+    @property
+    def price(self):
+        price_tag = self.soup.find('span', attrs={'class': 'price'})
         if price_tag:
-            data['price'] = price_tag.text
+            return price_tag.text
+        return None
 
-        body_tag = soup.select_one('#postingbody')
+    @property
+    def body(self):
+        body_tag = self.soup.select_one('#postingbody')
         if body_tag:
-            data['body'] = body_tag.text
-        #
-        # post_id_tag = soup.find('p', attrs={'class': 'postinginfo'})
-        # if post_id_tag:
-        #     data['post_id'] = post_id_tag.text
-        #
-        # created_time_tag = soup.find('time',attrs={'class': 'date timeago'})
-        # if created_time_tag:
-        #     data['created_time'] = created_time_tag.text
-        #
-        # modified_time_tag = soup.find('p', attrs={'class':"postinginfo reveal"})
-        # if modified_time_tag:
-        #     data['modified_time'] = modified_time_tag.text
-        # return data
+            return body_tag.text
+
+    @property
+    def post_id(self):
+        selector = 'p.postinginfo:nth-child(1)'
+        id_tag = self.soup.select_one(selector)
+        if id_tag:
+            return id_tag.text.replace("Id publi:", '')
+
+    @property
+    def created_time(self):
+        time_selector = '.postinginfos > p:nth-child(2) > time:nth-child(1)'
+        time = self.soup.select_one(time_selector)
+        if time:
+            return time.attrs['datetime']
+
+    @property
+    def modified_time(self):
+        modified_selector = 'p.postinginfo:nth-child(3) > time:nth-child(1)'
+        time = self.soup.select_one(modified_selector)
+        if time:
+            return time.attrs['datetime']
+
+    def parse(self, html_data):
+        self.soup = BeautifulSoup(html_data, 'html.parser')
+        data = dict(
+            title=self.title, price=self.price, body=self.body, post_id=self.post_id,
+            created_time=self.created_time, modified_time=self.modified_time
+        )
+
+        return data
