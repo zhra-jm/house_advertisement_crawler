@@ -31,7 +31,7 @@ class AdvertisementPageParser:
         selector = 'p.postinginfo:nth-child(1)'
         id_tag = self.soup.select_one(selector)
         if id_tag:
-            return id_tag.text.replace("Id publi:", '')
+            return id_tag.text.replace("post id:", '')
 
     @property
     def created_time(self):
