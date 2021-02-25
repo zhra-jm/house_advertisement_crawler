@@ -27,8 +27,13 @@ class MongoStorage(StorageAbstract):
         else:
             collection.insert_one(data)
 
-    def load(self):
-        return self.mongo.database.advertisement_links.find({'flag': False})
+    def load(self, collection_name, filter_name=None):
+        collection = self.mongo.database[collection_name]
+        if filter_name is not None:
+            data = collection.find(filter_name)
+        else:
+            data = collection.find()
+        return data
 
     def update_flag(self, data):
         self.mongo.database.advertisement_links.find_one_and_update(

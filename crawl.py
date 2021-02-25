@@ -84,7 +84,7 @@ class DataCrawler(CrawlerBase):
         self.parser = AdvertisementPageParser()
 
     def __load_links(self):
-        return self.storage.load()
+        return self.storage.load('advertisement_links', {'flag': False})
 
     def start(self, store):
         for link in self.links:
@@ -97,3 +97,41 @@ class DataCrawler(CrawlerBase):
     def store(self, data, filename):
         self.storage.store(data, 'advertisement_data')
         print(data['post_id'])
+
+
+class ImageDownloader(CrawlerBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.advertisements = self.__load_advertisements()
+
+    def __load_advertisements(self):
+        return self.storage.load('advertisement_data')
+
+    @staticmethod
+    def get(link):
+        try:
+            response = requests.get(link, stream=True)
+        except requests.HTTPError:
+            return None
+        return response
+
+    def start(self, store=True):
+        for advertisement in self.advertisements:
+            counter = 1
+            for image in advertisement['images']:
+                response = self.get(image['url'])
+                if store:
+                    self.store(response, advertisement['post_id'], counter)
+                counter += 1
+
+    def store(self, data, adv_id, img_number):
+        filename = f'{adv_id} - {img_number}'
+        return self.save_to_disc(data, filename)
+
+    def save_to_disc(self, response, filename):
+        with open(f'fixtures/images/{filename}.jpg', 'ab') as f:
+            f.write(response.content)
+            for _ in response.iter_content():
+                f.write(response.content)
+        print(filename)
+        return filename
