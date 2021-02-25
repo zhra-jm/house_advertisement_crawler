@@ -70,11 +70,11 @@ class LinkCrawler(CrawlerBase):
             print('total', city, len(links))
             adv_links.extend(links)
         if store:
-            self.store([li.get('href') for li in adv_links])
+            self.store([{'url': li.get('href')} for li in adv_links])
         return adv_links
 
     def store(self, data, *args):
-        self.storage.store(data, 'data')
+        self.storage.store(data, 'advertisement_links')
 
 
 class DataCrawler(CrawlerBase):
@@ -97,4 +97,5 @@ class DataCrawler(CrawlerBase):
                 self.store(data, data.get('post_id', 'sample'))
 
     def store(self, data, filename):
-        self.storage.store(data, filename)
+        self.storage.store(data, 'advertisement_data')
+        print(data['post_id'])
