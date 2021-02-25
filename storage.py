@@ -39,7 +39,8 @@ class MongoStorage(StorageAbstract):
 
 class FileStorage(StorageAbstract):
     def store(self, data, filename, *args):
-        filename = filename + '-' + data['post_id']
+        if filename == 'advertisement_data':
+            filename = filename + '-' + data['post_id']
         with open(f'fixtures/adv/{filename}.json', 'w') as f:
             f.write(json.dumps(data))
         print(f'fixtures/adv/{filename}.json')
