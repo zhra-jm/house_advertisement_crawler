@@ -3,9 +3,9 @@ A crawler that contains house advertisement data from cragslists site.
 
 
 ## Build With
-*mongoDB
+* mongoDB
 
-*python
+* python
 
 ## How To Use
 
@@ -37,4 +37,4 @@ A crawler that contains house advertisement data from cragslists site.
  
  ```python3 main.py "download_images"```
  
- *Wish you have enjoyed that!Good Luck:D
+ * Wish you have enjoyed that!Good Luck:D
